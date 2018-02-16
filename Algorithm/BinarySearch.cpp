@@ -10,10 +10,10 @@ int BinarySearch(int *arr, int len, int FindData)
 			return mid;
 		else
 		{
-			if (FindData < arr[mid])
-				right = mid - 1;
-			else
+			if (FindData > arr[mid])
 				left = mid + 1;
+			else
+				right = mid - 1;
 		}
 	}
 
@@ -22,11 +22,11 @@ int BinarySearch(int *arr, int len, int FindData)
 
 int BinarySerach_recursive(int *arr, int left, int right, int FindData)
 {
-	int mid;
 	if (left > right)
 		return -1;
-	mid = (left + right) / 2;
-
+	
+	int mid = (left + right) / 2;
+	
 	if (arr[mid] == FindData)
 		return mid;
 	else if (FindData < arr[mid])
