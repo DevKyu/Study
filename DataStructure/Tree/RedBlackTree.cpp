@@ -2,14 +2,14 @@
 
 RBTree::RBTree()
 {
-	nil =  NULL;
+	root = nil =  NULL;
 	nil = new Node();
 }
 
 RBTree::~RBTree()
 {
-	delete nil;
-	nil = NULL;
+	delete root;
+	root = NULL;
 }
 
 void RBTree::InsertNode(Node** root, int data)
@@ -28,9 +28,10 @@ void RBTree::InsertNode(Node** root, int data)
 
 	node = new Node();
 	node->data = data;
+	node->left = nil;
+	node->right = nil;
 	node->color = RED;
 	node->parent = ParentNode;
-	node->left = node->right = nil;
 
 	if (ParentNode)
 	{
@@ -42,8 +43,9 @@ void RBTree::InsertNode(Node** root, int data)
 	else
 	{
 		*root = node;
+		(*root)->left = nil;
+		(*root)->right = nil;
 		(*root)->color = BLACK;
-		(*root)->left = (*root)->right = nil;
 	}
 
 	InsertRuleCheck(root, node);
@@ -71,6 +73,7 @@ void RBTree::InsertRuleCheck(Node** root, Node* node)
 					node = node->parent;
 					RotateLeft(root, node);
 				}
+
 				node->parent->color = BLACK;
 				gParent->color = RED;
 				RotateRight(root, gParent);
@@ -93,6 +96,7 @@ void RBTree::InsertRuleCheck(Node** root, Node* node)
 					node = node->parent;
 					RotateRight(root, node);
 				}
+
 				node->parent->color = BLACK;
 				gParent->color = RED;
 				RotateLeft(root, gParent);
@@ -102,25 +106,68 @@ void RBTree::InsertRuleCheck(Node** root, Node* node)
 	(*root)->color = BLACK;
 }
 
+void RBTree::RotateLeft(Node** root, Node* node)
+{
+	Node* rightNode = node->right;
+	node->right = rightNode->left;
+
+	if (node->right != nil)
+		node->right->parent = rightNode;
+
+	rightNode->left = node;
+	rightNode->parent = node->parent;
+	node->parent = rightNode;
+
+	if (rightNode->parent == NULL)
+		*root = rightNode;
+	else
+	{
+		if (node == rightNode->parent->left)
+			rightNode->parent->left = rightNode;
+		else
+			rightNode->parent->right = rightNode;
+	}
+}
+
+void RBTree::RotateRight(Node** root, Node* node)
+{
+	Node* leftNode = node->left;
+	node->left = leftNode->right;
+
+	if (node->left != nil)
+		node->left->parent = leftNode;
+
+	leftNode->right = node;
+	leftNode->parent = node->parent;
+	node->parent = leftNode;
+
+	if (leftNode->parent == NULL)
+		*root = leftNode;
+	else
+	{
+		if (node == leftNode->parent->left)
+			leftNode->parent->left = leftNode;
+		else
+			leftNode->parent->right = leftNode;
+	}
+}
 
 void RBTree::DeleteNode(Node** root, int data)
 {
-	if (*root != NULL)
+	Node* node = SearchNode(*root, data);
+
+	if (node->left != nil && node->right != nil)
 	{
-		Node* node = SearchNode(*root, data);
-
-		if (node->left != nil && node->right != nil)
-		{
-			Node* temp = node;
-			node = node->left;
-			while (node->right != nil)
-				node = node->right;
-			temp->data = node->data;
-		}
-
-		DeleteRuleCheck(root, node);
+		Node* temp = node;
+		node = node->left;
+		while (node->right != nil)
+			node = node->right;
+		temp->data = node->data;
 	}
+
+	DeleteRuleCheck(root, node);
 }
+
 
 void RBTree::DeleteRuleCheck(Node** root, Node* node)
 {
@@ -222,67 +269,25 @@ void RBTree::DeleteRuleCheck(Node** root, Node* node)
 	}
 }
 
-void RBTree::RotateLeft(Node** root, Node* node)
-{
-	Node* rightNode = node->right;
-	node->right = rightNode->left;
-
-	if (node->right != nil)
-		node->right->parent = rightNode;
-
-	rightNode->left = node;
-	rightNode->parent = node->parent;
-	node->parent = rightNode;
-
-	if (rightNode->parent == NULL)
-		*root = rightNode;
-	else
-	{
-		if (node == rightNode->parent->left)
-			rightNode->parent->left = rightNode;
-		else
-			rightNode->parent->right = rightNode;
-	}
-}
-
-void RBTree::RotateRight(Node** root, Node* node)
-{
-	Node* leftNode = node->left;
-	node->left = leftNode->right;
-
-	if (node->left != nil)
-		node->left->parent = leftNode;
-
-	leftNode->right = node;
-	leftNode->parent = node->parent;
-	node->parent = leftNode;
-
-	if (leftNode->parent == NULL)
-		*root = leftNode;
-	else
-	{
-		if (node == leftNode->parent->left)
-			leftNode->parent->left = leftNode;
-		else
-			leftNode->parent->right = leftNode;
-	}
-}
-
 Node* RBTree::SearchNode(Node* root, int data)
 {
-	while (root != nil && root->data != data)
+	while (root->data != data && root != nil)
 	{
 		if (data < root->data)
 			root = root->left;
 		else if (data > root->data)
 			root = root->right;
 	}
-	return root != nil ? root : NULL;
+
+	if (root == nil)
+		return NULL;
+	else
+		return root;
 }
 
 void RBTree::PrintNode(Node* root)
 {
-	if (root == NULL || root == nil)
+	if (root == nil)
 		return;
 
 	cout << root->data << " " << root->color << endl;
